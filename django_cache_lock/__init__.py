@@ -1,1 +1,1 @@
-from .cache_lock import CacheLock
+from .cache_lock import CacheLock, mutex

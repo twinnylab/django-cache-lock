@@ -1,5 +1,6 @@
 import logging, time
 from uuid import uuid4
+from functools import wraps
 
 from django.core.cache import cache
 
@@ -51,3 +52,20 @@ class CacheLock:
 
     def __exit__(self, type, value, traceback):
         self.release()
+
+
+def mutex(key, skip_if_blocked=False):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            lock = CacheLock(key)
+            is_acquired = lock.acquire(block=False)
+            if not is_acquired and skip_if_blocked:
+                return
+            with lock:
+                result = func(*args, **kwargs)
+            return result
+
+        return wrapper
+
+    return decorator
