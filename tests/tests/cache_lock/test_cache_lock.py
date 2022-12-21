@@ -78,7 +78,7 @@ class CacheLockUnitTest(SimpleTestCase):
     def test_try_blocking(self):
         self.assertFalse(self.cache_lock.is_locked)
         self.assertFalse(self.cache_lock.is_acquired)
-        
+
         result = self.cache_lock._try_blocking()
         self.assertTrue(result)
         self.assertTrue(self.cache_lock.is_locked)
