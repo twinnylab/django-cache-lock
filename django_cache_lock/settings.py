@@ -2,7 +2,7 @@ from django.conf import settings
 
 USER_SETTINGS = getattr(settings, "DJANGO_CACHE_LOCK", None)
 
-KEY_PREFIX: str = getattr(settings, "DJANGO_CACHE_LOCK_" "KEY_PREFIX", "cache-lock")
+KEY_PREFIX: str = getattr(settings, "DJANGO_CACHE_LOCK_KEY_PREFIX", "cache-lock")
 RELEASE_CHECK_PERIOD: float = getattr(settings, "DJANGO_CACHE_LOCK_RELEASE_CHECK_PERIOD", 0.1)
 
 DEFAULTS = {
