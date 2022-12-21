@@ -44,9 +44,6 @@ class CacheLock:
             logger.debug(f"Lock is locked, sleeping for {self.release_check_period} seconds")
             time.sleep(self.release_check_period)
 
-    def __del__(self):
-        self.release()
-
     def __enter__(self):
         self.acquire()
 
