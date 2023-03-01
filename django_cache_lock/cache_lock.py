@@ -41,7 +41,7 @@ class CacheLock:
 
     def sleep(self):
         while self.is_locked:
-            logger.debug(f"Lock is locked, sleeping for {self.release_check_period} seconds")
+            logger.debug(f"Lock ({self.key}) is locked, sleeping for {self.release_check_period} seconds")
             time.sleep(self.release_check_period)
 
     def __enter__(self):
