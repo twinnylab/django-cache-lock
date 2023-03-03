@@ -24,24 +24,29 @@ class CacheLock:
         return bool(cache.get(self.key) == self.uuid)
 
     def acquire(self, block=True):
-        logger.info(f"Attempting to acquire lock for key '{self.key}'")
         while not self._try_blocking():
-            if self.is_acquired or not block:
+            if self.is_acquired:
+                logger.info(f"CacheLock ({self.uuid}) acquired lock for key '{self.key}'")
+                break
+            if not block:
+                logger.info(f"CacheLock ({self.uuid}) skipped acquiring lock for key '{self.key}'")
                 break
             self.sleep()
         return self.is_acquired
 
     def release(self):
-        logger.info(f"Releasing lock for key '{self.key}'")
         if self.is_acquired:
             cache.delete(self.key)
+            logger.info(f"CacheLock ({self.uuid}) released lock for key '{self.key}'")
 
     def _try_blocking(self):
         return cache.add(self.key, self.uuid, None)
 
     def sleep(self):
         while self.is_locked:
-            logger.debug(f"Lock ({self.key}) is locked, sleeping for {self.release_check_period} seconds")
+            logger.debug(
+                f"Lock ({self.key}) is locked, CacheLock ({self.uuid}) will sleep for {self.release_check_period} seconds"
+            )
             time.sleep(self.release_check_period)
 
     def __enter__(self):
