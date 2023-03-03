@@ -9,7 +9,7 @@ from django_cache_lock import CacheLock, mutex
 from django_cache_lock.settings import settings
 
 
-class CacheLockIntegrationtest(SimpleTestCase):
+class CacheLockIntegrationTest(SimpleTestCase):
     @staticmethod
     def increase_cache_value(key: str):
         value = cache.get(key, 0)
@@ -26,7 +26,7 @@ class CacheLockIntegrationtest(SimpleTestCase):
     def test_cache_lock(self):
         cache_lock_key = str(uuid4())
         date_key = "test-data-key"
-        test_function = functools.partial(CacheLockIntegrationtest.increase_cache_value_with_lock, cache_lock_key)
+        test_function = functools.partial(CacheLockIntegrationTest.increase_cache_value_with_lock, cache_lock_key)
         with Pool(10) as p:
             p.map(test_function, [date_key] * 1000)
         self.assertEqual(cache.get(date_key, 0), 1000)
@@ -41,7 +41,7 @@ class CacheLockIntegrationtest(SimpleTestCase):
         cache_lock_key = str(uuid4())
         date_key = "test-data-key"
         test_function = functools.partial(
-            CacheLockIntegrationtest.increase_cache_value_with_context_manager,
+            CacheLockIntegrationTest.increase_cache_value_with_context_manager,
             cache_lock_key,
         )
         with Pool(10) as p:
@@ -56,7 +56,7 @@ class CacheLockIntegrationtest(SimpleTestCase):
 
     def test_cache_lock_with_decorator(self):
         date_key = "test-data-key"
-        test_function = CacheLockIntegrationtest.increase_cache_value_with_decorator
+        test_function = CacheLockIntegrationTest.increase_cache_value_with_decorator
         with Pool(10) as p:
             p.map(test_function, [date_key] * 1000)
         self.assertEqual(cache.get(date_key, 0), 1000)
@@ -99,7 +99,7 @@ class CacheLockUnitTest(SimpleTestCase):
         self.assertTrue(self.cache_lock.is_locked)
         self.assertTrue(self.cache_lock.is_acquired)
 
-        # 다른 곳에서 사용 중인 Lock에서는 잠금 상태는 True지만, 소유 상태는 Fales 입니다.
+        # 다른 곳에서 사용 중인 Lock에서는 잠금 상태는 True지만, 소유 상태는 False 입니다.
         another_lock = CacheLock(key=self.key)
         self.assertTrue(another_lock.is_locked)
         self.assertFalse(another_lock.is_acquired)
