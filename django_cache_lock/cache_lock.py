@@ -1,4 +1,4 @@
-import logging, time
+import logging, time, atexit
 from uuid import uuid4
 from functools import wraps
 
@@ -37,10 +37,15 @@ class CacheLock:
     def release(self):
         if self.is_acquired:
             cache.delete(self.key)
+            atexit.unregister(cache.delete, self.key)
             logger.info(f"CacheLock ({self.uuid}) released lock for key '{self.key}'")
 
     def _try_blocking(self):
-        return cache.add(self.key, self.uuid, None)
+        if cache.add(self.key, self.uuid, None):
+            atexit.register(cache.delete, self.key)
+            return True
+        else:
+            return False
 
     def sleep(self):
         while self.is_locked:
