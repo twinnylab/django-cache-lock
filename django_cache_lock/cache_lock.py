@@ -15,6 +15,11 @@ class CacheLock:
         self.release_check_period: float = release_check_period or settings.RELEASE_CHECK_PERIOD
         self.uuid = str(uuid4())
 
+        def dispose():
+            return cache.delete(self.key)
+
+        self.dispose = dispose
+
     @property
     def is_locked(self):
         return bool(cache.get(self.key))
@@ -37,12 +42,12 @@ class CacheLock:
     def release(self):
         if self.is_acquired:
             cache.delete(self.key)
-            atexit.unregister(cache.delete, self.key)
+            atexit.unregister(self.dispose)
             logger.info(f"CacheLock ({self.uuid}) released lock for key '{self.key}'")
 
     def _try_blocking(self):
         if cache.add(self.key, self.uuid, None):
-            atexit.register(cache.delete, self.key)
+            atexit.register(self.dispose)
             return True
         else:
             return False
