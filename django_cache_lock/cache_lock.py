@@ -36,7 +36,7 @@ class CacheLock:
             if not block:
                 logger.info(f"CacheLock ({self.uuid}) skipped acquiring lock for key '{self.key}'")
                 break
-            self.sleep()
+            self._sleep()
         return self.is_acquired
 
     def release(self):
@@ -56,7 +56,7 @@ class CacheLock:
         else:
             return False
 
-    def sleep(self):
+    def _sleep(self):
         while self.is_locked:
             logger.debug(
                 f"Lock ({self.key}) is locked, CacheLock ({self.uuid}) will sleep for {self.release_check_period} seconds"
