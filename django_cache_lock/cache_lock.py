@@ -10,17 +10,19 @@ logger = logging.getLogger(__name__)
 
 
 class CacheLock:
-    def __init__(self, key, release_check_period=None):
+    def __init__(self, key, timeout=None, release_check_period=None):
         """
         Constructor
 
         Keyword arguments:
         key: lock key
+        timeout: timeout
         release_check_period: interval to check release when already locked by other lock (default: settings.RELEASE_CHECK_PERIOD)
         """
-        self.key = f"{settings.KEY_PREFIX}:{key}"
-        self.release_check_period: float = release_check_period or settings.RELEASE_CHECK_PERIOD
         self.uuid = str(uuid4())
+        self.key = f"{settings.KEY_PREFIX}:{key}"
+        self.timeout = timeout
+        self.release_check_period: float = release_check_period or settings.RELEASE_CHECK_PERIOD
 
         def dispose():
             return cache.delete(self.key)
@@ -57,7 +59,7 @@ class CacheLock:
         logger.info(f"CacheLock ({self.uuid}) forcibly released lock for key '{self.key}'")
 
     def _try_blocking(self):
-        if cache.add(self.key, self.uuid, None):
+        if cache.add(self.key, self.uuid, self.timeout):
             atexit.register(self.dispose)
             return True
         else:
