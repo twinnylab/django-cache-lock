@@ -45,6 +45,10 @@ class CacheLock:
             atexit.unregister(self.dispose)
             logger.info(f"CacheLock ({self.uuid}) released lock for key '{self.key}'")
 
+    def force_release(self):
+        cache.delete(self.key)
+        logger.info(f"CacheLock ({self.uuid}) forcibly released lock for key '{self.key}'")
+
     def _try_blocking(self):
         if cache.add(self.key, self.uuid, None):
             atexit.register(self.dispose)
