@@ -82,11 +82,11 @@ class CacheLock:
         self.release()
 
 
-def mutex(key, skip_if_blocked=False):
+def mutex(key, timeout=None, release_check_period=None, skip_if_blocked=False):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            lock = CacheLock(key)
+            lock = CacheLock(key, timeout, release_check_period)
             is_acquired = lock.acquire(block=False)
             if not is_acquired and skip_if_blocked:
                 return
