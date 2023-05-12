@@ -11,6 +11,13 @@ logger = logging.getLogger(__name__)
 
 class CacheLock:
     def __init__(self, key, release_check_period=None):
+        """
+        Constructor
+
+        Keyword arguments:
+        key: lock key
+        release_check_period: interval to check release when already locked by other lock (default: settings.RELEASE_CHECK_PERIOD)
+        """
         self.key = f"{settings.KEY_PREFIX}:{key}"
         self.release_check_period: float = release_check_period or settings.RELEASE_CHECK_PERIOD
         self.uuid = str(uuid4())
