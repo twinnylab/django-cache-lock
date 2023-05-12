@@ -1,4 +1,5 @@
 import logging, time, atexit
+from typing import Optional
 from uuid import uuid4
 from functools import wraps
 
@@ -10,7 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 class CacheLock:
-    def __init__(self, key, timeout=None, release_check_period=None):
+    def __init__(
+        self,
+        key: str,
+        timeout: Optional[float] = None,
+        release_check_period: Optional[float] = None,
+    ):
         """
         Constructor
 
@@ -82,7 +88,12 @@ class CacheLock:
         self.release()
 
 
-def mutex(key, timeout=None, release_check_period=None, skip_if_blocked=False):
+def mutex(
+    key: str,
+    timeout: Optional[float] = None,
+    release_check_period: Optional[float] = None,
+    skip_if_blocked: bool = False,
+):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
