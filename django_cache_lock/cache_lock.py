@@ -58,6 +58,9 @@ class CacheLock:
         cache.delete(self.key)
         logger.info(f"CacheLock ({self.uuid}) forcibly released lock for key '{self.key}'")
 
+    def touch(self):
+        return cache.touch(self.key, self.timeout)
+
     def _try_blocking(self):
         if cache.add(self.key, self.uuid, self.timeout):
             atexit.register(self.dispose)
