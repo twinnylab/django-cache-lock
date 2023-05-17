@@ -59,12 +59,15 @@ class CacheLock:
             cache.delete(self.key)
             atexit.unregister(self.dispose)
             logger.info(f"CacheLock ({self.uuid}) released lock for key '{self.key}'")
+        else:
+            logger.error(f"CacheLock ({self.uuid}) cannot release for key '{self.key}'. It is already released")
 
     def force_release(self):
         cache.delete(self.key)
         logger.info(f"CacheLock ({self.uuid}) forcibly released lock for key '{self.key}'")
 
     def touch(self):
+        logger.debug(f"CacheLock ({self.uuid}) set timeout to {self.timeout} second(s) for key '{self.key}'")
         return cache.touch(self.key, self.timeout)
 
     def _try_blocking(self):
