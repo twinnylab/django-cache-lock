@@ -96,11 +96,17 @@ def mutex(
     timeout: Optional[float] = None,
     release_check_period: Optional[float] = None,
     skip_if_blocked: bool = False,
+    attribute_name_as_identifier: Optional[str] = None,
 ):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            lock = CacheLock(key, timeout, release_check_period)
+            if attribute_name_as_identifier and args and hasattr(args[0], attribute_name_as_identifier):
+                lock_key = f"{key}:{getattr(args[0], attribute_name_as_identifier)}"
+            else:
+                lock_key = key
+
+            lock = CacheLock(lock_key, timeout, release_check_period)
             is_acquired = lock.acquire(block=False)
             if not is_acquired and skip_if_blocked:
                 return
