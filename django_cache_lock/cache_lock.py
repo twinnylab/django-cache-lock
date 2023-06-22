@@ -18,7 +18,7 @@ class CacheLock:
         release_check_period: Optional[float] = None,
     ):
         """
-        Constructor
+        Initializer
 
         Keyword arguments:
         key: lock key
