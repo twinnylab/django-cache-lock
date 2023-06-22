@@ -131,18 +131,18 @@ class CacheLockUnitTest(SimpleTestCase):
 
         self.cache_lock.release()
 
-    def test_try_blocking(self):
+    def test_private_acquire(self):
         self.assertFalse(self.cache_lock.is_locked)
         self.assertFalse(self.cache_lock.is_acquired)
 
-        result = self.cache_lock._try_blocking()
+        result = self.cache_lock._acquire()
         self.assertTrue(result)
         self.assertTrue(self.cache_lock.is_locked)
         self.assertTrue(self.cache_lock.is_acquired)
 
         # 이미 다른 곳에서 점유 중이라면 잠글 수 없습니다.
         another_lock = CacheLock(key=self.key)
-        result = another_lock._try_blocking()
+        result = another_lock._acquire()
         self.assertFalse(result)
         self.assertTrue(another_lock.is_locked)
         self.assertFalse(another_lock.is_acquired)
