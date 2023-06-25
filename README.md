@@ -16,11 +16,11 @@ INSTALLED_APPS = [
 프로젝트의 settings에 다음과 같이 설정을 추가할 수 있습니다.
 
 ``` python
-DJANGO_CACHE_LOCK_KEY_PREFIX = "cache-lock"
+DJANGO_CACHE_LOCK_CACHE_KEY_PREFIX = "cache-lock"
 DJANGO_CACHE_LOCK_RELEASE_CHECK_PERIOD = 0.1
 ```
 
 ### 가능한 옵션
 
-- DJANGO_CACHE_LOCK_KEY_PREFIX (기본 값: "cache-lock"): django cache에서 key에 사용되는 접두사 입니다.
+- DJANGO_CACHE_LOCK_CACHE_KEY_PREFIX (기본 값: "cache-lock"): django cache에서 key에 사용되는 접두사 입니다.
 - DJANGO_CACHE_LOCK_RELEASE_CHECK_PERIOD (기본 값: 0.1): Lock 점유 시도 시 block 상태에서 다시 점유를 시도하는 주기 입니다.
