@@ -11,6 +11,7 @@ django-redis = "*"
 
 [dev-packages]
 black = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.10"
