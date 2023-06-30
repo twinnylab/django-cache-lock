@@ -65,11 +65,11 @@ class CacheLockManager:
         return self
 
     def __exit__(self, exc_type: type[Exception] | None, *exc_info) -> bool:
-        self.release()
-        if exc_type == CacheLockManager.AlreadyAcquiredAnotherUserError:
+        if exc_type == CacheLockManager.AlreadyAcquiredByAnotherUserError:
             return True
+        self.release()
 
-    class AlreadyAcquiredAnotherUserError(Exception):
+    class AlreadyAcquiredByAnotherUserError(Exception):
         pass
 
 
@@ -94,7 +94,7 @@ def mutex(
             result = None
             with cache_lock_manager:
                 if not cache_lock_manager.is_acquired():
-                    raise cache_lock_manager.AlreadyAcquiredAnotherUserError()
+                    raise cache_lock_manager.AlreadyAcquiredByAnotherUserError()
                 if bind:
                     result = func(cache_lock_manager=cache_lock_manager, *args, **kwargs)
                 else:
