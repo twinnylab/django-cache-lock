@@ -24,3 +24,7 @@ DJANGO_CACHE_LOCK_RELEASE_CHECK_PERIOD = 0.1
 
 - DJANGO_CACHE_LOCK_CACHE_KEY_PREFIX (기본 값: "cache-lock"): django cache에서 key에 사용되는 접두사 입니다.
 - DJANGO_CACHE_LOCK_RELEASE_CHECK_PERIOD (기본 값: 0.1): Lock 점유 시도 시 block 상태에서 다시 점유를 시도하는 주기 입니다.
+
+## 사용 방법
+
+[통합 테스트 코드 참고](./tests/test_cache_lock_manager.py)
