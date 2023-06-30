@@ -1,6 +1,7 @@
 import uuid
 import time
 import functools
+import asyncio
 from multiprocessing import Process, Queue, Pool
 from unittest.mock import patch
 
@@ -37,6 +38,17 @@ def run_using_decorator(data_key: str):
 def run_using_decorator_without_block(data_key: str):
     non_atomic_increment_cache_value(data_key)
     time.sleep(3)
+
+
+@mutex(str(uuid.uuid4()), cache_lock_timeout=5)
+async def async_run_using_decorator(data_key: str):
+    non_atomic_increment_cache_value(data_key)
+
+
+@mutex(str(uuid.uuid4()), cache_lock_timeout=5, skip_if_blocked=True)
+async def async_run_using_decorator_without_block(data_key: str):
+    non_atomic_increment_cache_value(data_key)
+    await asyncio.sleep(3)
 
 
 class CacheLockTestClass:
@@ -78,15 +90,23 @@ class CacheLockIntegrationTest(SimpleTestCase):
         self.assertEqual(cache.get(self.data_key, 0), 1000)
 
     def test_cache_lock_using_decorator(self):
-        test_function = run_using_decorator
         with Pool(100) as process:
-            process.map(test_function, [self.data_key] * 1000)
+            process.map(run_using_decorator, [self.data_key] * 1000)
         self.assertEqual(cache.get(self.data_key, 0), 1000)
 
     def test_cache_lock_using_decorator_without_block(self):
-        test_function = run_using_decorator_without_block
         with Pool(100) as process:
-            process.map(test_function, [self.data_key] * 100)
+            process.map(run_using_decorator_without_block, [self.data_key] * 100)
+        self.assertEqual(cache.get(self.data_key, 0), 1)
+
+    async def test_async_cache_lock_using_decorator(self):
+        tasks = [async_run_using_decorator(self.data_key) for _ in range(100)]
+        await asyncio.gather(*tasks)
+        self.assertEqual(cache.get(self.data_key, 0), 100)
+
+    async def test_async_cache_lock_using_decorator_without_block(self):
+        tasks = [async_run_using_decorator_without_block(self.data_key) for _ in range(100)]
+        await asyncio.gather(*tasks)
         self.assertEqual(cache.get(self.data_key, 0), 1)
 
     def test_cache_lock_using_decorator_with_identifier(self):

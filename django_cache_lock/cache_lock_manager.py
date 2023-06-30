@@ -1,5 +1,6 @@
 import time
 import uuid
+import asyncio
 import logging
 import functools
 from typing import TYPE_CHECKING
@@ -83,24 +84,42 @@ def mutex(
 ) -> "Callable":
     def decorator(func: "Callable") -> "Callable":
         @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> "Callable":
-            if identifier_attribute_name:
-                identifier = getattr(args[0], identifier_attribute_name)
-                cache_lock = CacheLock(f"{cache_lock_id}:{identifier}", cache_lock_timeout)
-            else:
-                cache_lock = CacheLock(cache_lock_id, cache_lock_timeout)
-
-            cache_lock_manager = CacheLockManager(cache_lock, not skip_if_blocked, release_check_period)
+        async def async_run_with_mutex(*args, cache_lock_manager: "CacheLockManager", **kwargs) -> "Callable":
             result = None
             with cache_lock_manager:
                 if not cache_lock_manager.is_acquired():
                     raise cache_lock_manager.AlreadyAcquiredByAnotherUserError()
                 if bind:
-                    result = func(cache_lock_manager=cache_lock_manager, *args, **kwargs)
-                else:
-                    result = func(*args, **kwargs)
+                    kwargs["cache_lock_manager"] = cache_lock_manager
+                result = await func(*args, **kwargs)
             return result
 
-        return wrapper
+        @functools.wraps(func)
+        def sync_run_with_mutex(*args, cache_lock_manager: "CacheLockManager", **kwargs) -> "Callable":
+            result = None
+            with cache_lock_manager:
+                if not cache_lock_manager.is_acquired():
+                    raise cache_lock_manager.AlreadyAcquiredByAnotherUserError()
+                if bind:
+                    kwargs["cache_lock_manager"] = cache_lock_manager
+                result = func(*args, **kwargs)
+            return result
+
+        if asyncio.iscoroutinefunction(func):
+            run_with_mutex = async_run_with_mutex
+        else:
+            run_with_mutex = sync_run_with_mutex
+
+        @functools.wraps(run_with_mutex)
+        def import_cache_lock_manager(*args, **kwargs):
+            if identifier_attribute_name:
+                identifier = getattr(args[0], identifier_attribute_name)
+                cache_lock = CacheLock(f"{cache_lock_id}:{identifier}", cache_lock_timeout)
+            else:
+                cache_lock = CacheLock(cache_lock_id, cache_lock_timeout)
+            cache_lock_manager = CacheLockManager(cache_lock, not skip_if_blocked, release_check_period)
+            return run_with_mutex(cache_lock_manager=cache_lock_manager, *args, **kwargs)
+
+        return import_cache_lock_manager
 
     return decorator
