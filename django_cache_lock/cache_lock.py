@@ -32,11 +32,18 @@ class CacheLock:
         return self.is_locked_by(lock_key)
 
     def unlock_with(self, lock_key: str) -> bool:
-        return not self.is_locked() or (self.is_locked_by(lock_key) and self.unlock())
+        if not self.is_locked():
+            return True
+        if not self.is_locked_by(lock_key):
+            return False
+        else:
+            return self.unlock()
 
     def unlock(self) -> bool:
-        cache.delete(self._cache_key)
-        return not self.is_locked()
+        if not self.is_locked():
+            return True
+        else:
+            return cache.delete(self._cache_key)
 
     def touch(self, timeout: int | None = None) -> bool:
         return cache.touch(self._cache_key, timeout or self._cache_timeout)
