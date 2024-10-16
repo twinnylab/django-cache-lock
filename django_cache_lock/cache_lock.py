@@ -16,10 +16,15 @@ class CacheLock:
     def id(self, id: str) -> None:
         self._id = id
         self._cache_key = f"{settings.CACHE_KEY_PREFIX}:{id}"
+        self._is_waiting_to_run_once_cache_key = f"{self._cache_key}:is_waiting_to_run_once"
 
     @property
     def lock_key(self) -> str | None:
         return cache.get(self._cache_key)
+
+    @property
+    def is_waiting_to_run_once(self) -> bool:
+        return bool(cache.get(self._is_waiting_to_run_once_cache_key))
 
     def is_locked(self) -> bool:
         return bool(self.lock_key)
@@ -44,6 +49,12 @@ class CacheLock:
             return True
         else:
             return cache.delete(self._cache_key)
+
+    def set_is_waiting_to_run_once(self):
+        cache.add(self._is_waiting_to_run_once_cache_key, "is_waiting_to_run_once")
+
+    def remove_is_waiting_to_run_once(self):
+        cache.delete(self._is_waiting_to_run_once_cache_key)
 
     def touch(self, timeout: int | None = None) -> bool:
         return cache.touch(self._cache_key, timeout or self._cache_timeout)
