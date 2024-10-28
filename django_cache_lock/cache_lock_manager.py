@@ -89,7 +89,12 @@ class CacheLockManager:
                         logger.info("CacheLock acquisition skipped.", extra={"data": self.state})
                         return False
                     case BlockOption.IGNORE_AND_RUN_ONCE:
-                        self.cache_lock.set_is_waiting_to_run_once()
+                        if not self.cache_lock.set_is_waiting_to_run_once():
+                            logger.info(
+                                "CacheLock acquisition skipped. because it is waiting to run once.",
+                                extra={"data": self.state}
+                            )
+                            return False
                         logger.info("Waiting to acquire CacheLock at once.", extra={"data": self.state})
                         self._sleep_until_unlock()
                         logger.info("Waiting interrupted; retrying to acquire CacheLock.", extra={"data": self.state})

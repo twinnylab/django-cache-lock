@@ -50,11 +50,11 @@ class CacheLock:
         else:
             return cache.delete(self._cache_key)
 
-    def set_is_waiting_to_run_once(self):
-        cache.add(self._is_waiting_to_run_once_cache_key, "is_waiting_to_run_once")
+    def set_is_waiting_to_run_once(self) -> bool:
+        return cache.add(self._is_waiting_to_run_once_cache_key, "is_waiting_to_run_once")
 
     def remove_is_waiting_to_run_once(self):
-        cache.delete(self._is_waiting_to_run_once_cache_key)
+        return cache.delete(self._is_waiting_to_run_once_cache_key)
 
     def touch(self, timeout: int | None = None) -> bool:
         return cache.touch(self._cache_key, timeout or self._cache_timeout)
